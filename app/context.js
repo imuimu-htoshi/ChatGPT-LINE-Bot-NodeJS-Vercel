@@ -14,6 +14,7 @@ import {
   fetchUser,
   generateTranscription,
 } from '../utils/index.js';
+import stripMarkdown from '../utils/strip-markdown.js';
 import { Command, COMMAND_BOT_RETRY } from './commands/index.js';
 import { updateHistory } from './history/index.js';
 import {
@@ -279,7 +280,7 @@ class Context {
     const content = prefix && !text.startsWith(prefix) ? `${prefix}\n\n${text}` : text;
     const message = new TextMessage({
       type: MESSAGE_TYPE_TEXT,
-      text: convertText(content),
+      text: convertText(stripMarkdown(content)),
     });
     message.setQuickReply(actions);
     this.messages.push(message);
