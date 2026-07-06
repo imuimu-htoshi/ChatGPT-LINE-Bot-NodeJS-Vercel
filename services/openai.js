@@ -48,7 +48,7 @@ const createChatCompletion = ({
   model,
   messages,
   temperature,
-  max_tokens: maxTokens,
+  max_completion_tokens: maxTokens,
   frequency_penalty: frequencyPenalty,
   presence_penalty: presencePenalty,
 });

@@ -51,6 +51,7 @@ const generateImage = async ({
     model,
     imageTokenUsage: data.usage?.input_tokens_details?.image_tokens,
     textTokenUsage: data.usage?.input_tokens_details?.text_tokens,
+    outputTokenUsage: data.usage?.output_tokens,
   });
   return new Image({
     ...image,

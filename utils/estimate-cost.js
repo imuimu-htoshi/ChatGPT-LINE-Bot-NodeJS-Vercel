@@ -1,10 +1,11 @@
 import config from '../config/index.js';
 
+// 価格出典: https://developers.openai.com/api/docs/pricing (2026-07時点)
 const COMPLETION_PRICES_PER_1M = {
-  'gpt-5.5': { input: 2.5, output: 15 },
-  'gpt-5.4': { input: 1.25, output: 7.5 },
-  'gpt-5.4-mini': { input: 0.375, output: 2.25 },
-  'gpt-5.4-nano': { input: 0.1, output: 0.625 },
+  'gpt-5.5': { input: 5, output: 30 },
+  'gpt-5.4': { input: 2.5, output: 15 },
+  'gpt-5.4-mini': { input: 0.75, output: 4.5 },
+  'gpt-5.4-nano': { input: 0.2, output: 1.25 },
   'gpt-4.1': { input: 2, output: 8 },
   'gpt-4.1-mini': { input: 0.4, output: 1.6 },
   'gpt-4.1-nano': { input: 0.1, output: 0.4 },
@@ -12,7 +13,7 @@ const COMPLETION_PRICES_PER_1M = {
   'gpt-4o-mini': { input: 0.15, output: 0.6 },
 };
 
-const WEB_SEARCH_TOOL_CALL_PRICE_USD = 0.025;
+const WEB_SEARCH_TOOL_CALL_PRICE_USD = 0.01;
 
 const findPricing = (prices, model = '') => {
   if (prices[model]) return prices[model];
@@ -23,9 +24,9 @@ const findPricing = (prices, model = '') => {
 };
 
 const IMAGE_PRICES = {
-  'gpt-image-2': { input: 8, output: 30 },
-  'gpt-image-1.5': { input: 8, output: 32 },
-  'gpt-image-1-mini': { input: 2.5, output: 8 },
+  'gpt-image-2': { textInput: 5, imageInput: 8, output: 30 },
+  'gpt-image-1.5': { textInput: 5, imageInput: 8, output: 32 },
+  'gpt-image-1-mini': { textInput: 2, imageInput: 2.5, output: 8 },
 };
 
 const roundUsd = (value) => (Number.isFinite(value) ? Number(value.toFixed(6)) : null);
@@ -52,12 +53,18 @@ const estimateImageCost = ({
   model = config.OPENAI_IMAGE_MODEL,
   imageTokenUsage,
   textTokenUsage,
+  outputTokenUsage,
 } = {}) => {
   const pricing = findPricing(IMAGE_PRICES, model);
-  if (!Number.isFinite(pricing.input) || !Number.isFinite(pricing.output)) return null;
+  if (!Number.isFinite(pricing.imageInput) || !Number.isFinite(pricing.output)) return null;
   const imageTokens = imageTokenUsage || 0;
   const textTokens = textTokenUsage || 0;
-  return roundUsd(((imageTokens / 1_000_000) * pricing.input) + ((textTokens / 1_000_000) * pricing.output));
+  const outputTokens = outputTokenUsage || 0;
+  return roundUsd(
+    ((textTokens / 1_000_000) * pricing.textInput)
+    + ((imageTokens / 1_000_000) * pricing.imageInput)
+    + ((outputTokens / 1_000_000) * pricing.output),
+  );
 };
 
 export {

@@ -10,7 +10,7 @@ test('ESTIMATE_COMPLETION_COST_SUPPORTS_GPT_5_4_MINI', () => {
     },
   });
 
-  expect(cost).toEqual(0.0015);
+  expect(cost).toEqual(0.003);
 });
 
 test('ESTIMATE_COMPLETION_COST_RETURNS_NULL_FOR_UNKNOWN_MODEL_WITHOUT_OVERRIDE', () => {
