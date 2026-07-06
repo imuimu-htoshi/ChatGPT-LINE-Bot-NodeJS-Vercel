@@ -101,6 +101,7 @@ const ja = {
   __COMPLETION_SEARCH: (a, q) => `検索結果「${a}」を参考に、「${q}」に回答してください。`,
   __COMPLETION_SEARCH_WITH_SOURCE: (a, q, d = '') => `${d ? `対象日: ${d}\n` : ''}次の検索結果だけを根拠に、「${q}」へ日本語で簡潔に回答してください。\n検索結果: ${a}`,
   __COMPLETION_WEB_SEARCH: (q, d = '') => `${d ? `対象日: ${d}\n` : ''}Web検索を使って、「${q}」に日本語で簡潔に回答してください。`,
+  __COST_FOOTER: (yen) => `この回答には約${yen}円かかりました`,
   __COMPLETION_SEARCH_NOT_FOUND: '関連情報が見つかりませんでした',
   __COMPLETION_QUOTATION_MARK_OPENING: '「',
   __COMPLETION_QUOTATION_MARK_CLOSING: '」',

@@ -125,6 +125,8 @@ OPENAI_IMAGE_OUTPUT_COMPRESSION=80
 ```
 
 - OpenAI応答ごとに、使用モデル、入力トークン、出力トークン、推定コストをサーバーログへ出します。
+- `APP_COST_MESSAGE_ENABLED`（デフォルト有効）で、返信の最後に「この回答には約◯円かかりました」を付けます。`false` で無効化できます。
+- 円換算レートは `APP_USD_JPY_RATE`（デフォルト150）で調整できます。
 - `OPENAI_COMPLETION_INPUT_PRICE_PER_1M` と `OPENAI_COMPLETION_OUTPUT_PRICE_PER_1M` を設定すると、任意モデルでも推定コストを上書きできます。
 - 画像生成は `OPENAI_IMAGE_MODEL` が `gpt-image-2`、`gpt-image-1.5`、`gpt-image-1-mini` のいずれかなら推定コストを出します。
 

@@ -101,6 +101,7 @@ const zh = {
   __COMPLETION_SEARCH: (a, q) => `根據「${a}」查詢結果，回答「${q}」問題`,
   __COMPLETION_SEARCH_WITH_SOURCE: (a, q, d = '') => `${d ? `日期：${d}\n` : ''}請只根據以下搜尋結果，簡潔回答「${q}」。\n搜尋結果：${a}`,
   __COMPLETION_WEB_SEARCH: (q, d = '') => `${d ? `日期：${d}\n` : ''}請使用網路搜尋，簡潔回答「${q}」。`,
+  __COST_FOOTER: (yen) => `這則回覆約花費了${yen}日圓`,
   __COMPLETION_SEARCH_NOT_FOUND: '查無資料',
   __COMPLETION_QUOTATION_MARK_OPENING: '「',
   __COMPLETION_QUOTATION_MARK_CLOSING: '」',

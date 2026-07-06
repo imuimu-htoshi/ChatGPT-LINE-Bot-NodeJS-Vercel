@@ -36,26 +36,27 @@ const shouldHandleEvent = (event) => {
  * @param {Context} context
  * @returns {Promise<Context>}
  */
-const handleContext = async (context) => (
-  context.setRoute(buildRoutingDecision(context))
-  && (
-  activateHandler(context)
-  || commandHandler(context)
-  || continueHandler(context)
-  || deactivateHandler(context)
-  || deployHandler(context)
-  || docHandler(context)
-  || drawHandler(context)
-  || forgetHandler(context)
-  || enquireHandler(context)
-  || reportHandler(context)
-  || retryHandler(context)
-  || searchHandler(context)
-  || versionHandler(context)
-  || talkHandler(context)
-  || context
-  )
-);
+const handleContext = async (context) => {
+  context.setRoute(buildRoutingDecision(context));
+  const handled = await (
+    activateHandler(context)
+    || commandHandler(context)
+    || continueHandler(context)
+    || deactivateHandler(context)
+    || deployHandler(context)
+    || docHandler(context)
+    || drawHandler(context)
+    || forgetHandler(context)
+    || enquireHandler(context)
+    || reportHandler(context)
+    || retryHandler(context)
+    || searchHandler(context)
+    || versionHandler(context)
+    || talkHandler(context)
+    || context
+  );
+  return handled.pushCostFooter();
+};
 
 const handleEvents = async (events = []) => (
   (Promise.all(

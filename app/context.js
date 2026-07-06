@@ -149,6 +149,27 @@ class Context {
     return this;
   }
 
+  get totalCostUsd() {
+    return this.usage.reduce((sum, { estimatedCostUsd }) => (
+      Number.isFinite(estimatedCostUsd) ? sum + estimatedCostUsd : sum
+    ), 0);
+  }
+
+  pushCostFooter() {
+    if (!config.APP_COST_MESSAGE_ENABLED) return this;
+    const totalUsd = this.totalCostUsd;
+    if (totalUsd <= 0 || this.messages.length < 1) return this;
+    const yen = totalUsd * config.APP_USD_JPY_RATE;
+    const footer = t('__COST_FOOTER')(yen < 0.01 ? '0.01未満' : yen.toFixed(2));
+    const lastTextMessage = [...this.messages].reverse().find(({ type }) => type === MESSAGE_TYPE_TEXT);
+    if (lastTextMessage) {
+      lastTextMessage.text += `\n\n${footer}`;
+    } else {
+      this.messages.push(new TextMessage({ text: footer }));
+    }
+    return this;
+  }
+
   async initialize() {
     try {
       this.validate();
