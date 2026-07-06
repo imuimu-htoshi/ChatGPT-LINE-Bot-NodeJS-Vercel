@@ -309,7 +309,12 @@ class Context {
       console.info(err.message);
       return this;
     }
-    console.error(this.error);
+    console.error(JSON.stringify({
+      message: this.error.message,
+      status: this.error.response?.status,
+      data: this.error.response?.data,
+      url: this.error.config ? `${this.error.config.baseURL || ''}${this.error.config.url || ''}` : undefined,
+    }));
     if (err.code === 'ECONNABORTED') {
       if (config.ERROR_MESSAGE_DISABLED) return this;
       return this.pushText(t('__ERROR_ECONNABORTED'), [COMMAND_BOT_RETRY]);
