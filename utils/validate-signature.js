@@ -16,9 +16,12 @@ const validateSignature = (
   body,
   secret,
   signature,
-) => safeCompare(
-  createHmac('SHA256', secret).update(body).digest(),
-  s2b(signature, 'base64'),
-);
+) => {
+  if (!body || !secret || !signature) return false;
+  return safeCompare(
+    createHmac('SHA256', secret).update(body).digest(),
+    s2b(signature, 'base64'),
+  );
+};
 
 export default validateSignature;
