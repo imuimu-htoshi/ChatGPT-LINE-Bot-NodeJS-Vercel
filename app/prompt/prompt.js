@@ -5,7 +5,8 @@ import { ROLE_AI, ROLE_HUMAN, ROLE_SYSTEM } from '../../services/openai.js';
 import { addMark } from '../../utils/index.js';
 import Message from './message.js';
 
-const MAX_MESSAGES = config.APP_MAX_PROMPT_MESSAGES + 3;
+const INITIAL_MESSAGES = 3;
+const MAX_MESSAGES = INITIAL_MESSAGES + config.APP_MAX_PROMPT_MESSAGES;
 const MAX_TOKENS = config.APP_MAX_PROMPT_TOKENS;
 
 class Prompt {
@@ -37,16 +38,23 @@ class Prompt {
     return this;
   }
 
+  trim() {
+    while (this.messages.length > MAX_MESSAGES) {
+      this.messages.splice(INITIAL_MESSAGES, 1);
+    }
+    while (this.messages.length > INITIAL_MESSAGES + 2 && this.tokenCount >= MAX_TOKENS) {
+      this.messages.splice(INITIAL_MESSAGES, 1);
+    }
+    return this;
+  }
+
   /**
    * @param {string} role
    * @param {string} content
    */
   write(role, content = '') {
-    if (this.messages.length >= MAX_MESSAGES || this.tokenCount >= MAX_TOKENS) {
-      this.messages.splice(3, 1);
-    }
     this.messages.push(new Message({ role, content: addMark(content) }));
-    return this;
+    return this.trim();
   }
 
   /**

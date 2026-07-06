@@ -107,6 +107,7 @@ const en = {
   __ERROR_MAX_GROUPS_REACHED: 'Maximum groups reached',
   __ERROR_MAX_USERS_REACHED: 'Maximum users reached',
   __ERROR_MISSING_ENV: (v) => `Missing environment variable: ${v}`,
+  __ERROR_EMPTY_PROMPT: 'Please enter your question.',
   __MESSAGE_NEW_VERSION_AVAILABLE: (version) => `A new version ${version} is now available!`,
   __SOURCE_NAME_SOME_GROUP: 'Someone Group',
   __SOURCE_NAME_SOMEONE: 'Someone',

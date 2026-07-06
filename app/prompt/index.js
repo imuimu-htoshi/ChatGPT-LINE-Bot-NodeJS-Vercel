@@ -3,29 +3,29 @@ import Prompt from './prompt.js';
 const prompts = new Map();
 
 /**
- * @param {string} userId
+ * @param {string} contextId
  * @returns {Prompt}
  */
-const getPrompt = (userId) => prompts.get(userId) || new Prompt();
+const getPrompt = (contextId) => prompts.get(contextId) || new Prompt();
 
 /**
- * @param {string} userId
+ * @param {string} contextId
  * @param {Prompt} prompt
  */
-const setPrompt = (userId, prompt) => {
-  prompts.set(userId, prompt);
+const setPrompt = (contextId, prompt) => {
+  prompts.set(contextId, prompt);
 };
 
 /**
- * @param {string} userId
+ * @param {string} contextId
  */
-const removePrompt = (userId) => {
-  prompts.delete(userId);
+const removePrompt = (contextId) => {
+  prompts.delete(contextId);
 };
 
 const printPrompts = () => {
   if (Array.from(prompts.keys()).length < 1) return;
-  const content = Array.from(prompts.keys()).map((userId) => `\n=== ${userId.slice(0, 6)} ===\n${getPrompt(userId)}\n`).join('');
+  const content = Array.from(prompts.keys()).map((contextId) => `\n=== ${contextId.slice(0, 6)} ===\n${getPrompt(contextId)}\n`).join('');
   console.info(content);
 };
 

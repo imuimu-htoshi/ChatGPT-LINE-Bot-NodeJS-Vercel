@@ -17,14 +17,14 @@ const check = (context) => context.hasCommand(COMMAND_BOT_CONTINUE);
 const exec = (context) => check(context) && (
   async () => {
     updateHistory(context.id, (history) => history.erase());
-    const prompt = getPrompt(context.userId);
+    const prompt = getPrompt(context.id);
     const { lastMessage } = prompt;
     if (lastMessage.isEnquiring) prompt.erase();
     try {
       const { text, isFinishReasonStop } = await generateCompletion({ prompt });
       prompt.patch(text);
       if (lastMessage.isEnquiring && !isFinishReasonStop) prompt.write('', lastMessage.content);
-      setPrompt(context.userId, prompt);
+      setPrompt(context.id, prompt);
       if (!lastMessage.isEnquiring) updateHistory(context.id, (history) => history.patch(text));
       const defaultActions = ALL_COMMANDS.filter(({ type }) => type === lastMessage.content);
       const actions = isFinishReasonStop ? defaultActions : [COMMAND_BOT_CONTINUE];

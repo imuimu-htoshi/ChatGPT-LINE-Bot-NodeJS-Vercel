@@ -19,12 +19,12 @@ const check = (context) => context.hasCommand(COMMAND_BOT_RETRY);
 const exec = (context) => check(context) && (
   async () => {
     updateHistory(context.id, (history) => history.erase());
-    const prompt = getPrompt(context.userId);
+    const prompt = getPrompt(context.id);
     prompt.erase().write(ROLE_AI);
     try {
       const { text, isFinishReasonStop } = await generateCompletion({ prompt });
       prompt.patch(text);
-      setPrompt(context.userId, prompt);
+      setPrompt(context.id, prompt);
       updateHistory(context.id, (history) => history.write(config.BOT_NAME, text));
       const actions = isFinishReasonStop ? [] : [COMMAND_BOT_CONTINUE];
       context.pushText(text, actions);

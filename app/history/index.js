@@ -26,10 +26,10 @@ const updateHistory = (contextId, callback) => {
 };
 
 /**
- * @param {string} userId
+ * @param {string} contextId
  */
-const removeHistory = (userId) => {
-  histories.delete(userId);
+const removeHistory = (contextId) => {
+  histories.delete(contextId);
 };
 
 const printHistories = () => {

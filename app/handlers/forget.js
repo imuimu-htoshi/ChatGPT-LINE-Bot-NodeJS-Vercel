@@ -15,8 +15,8 @@ const check = (context) => context.hasCommand(COMMAND_BOT_FORGET);
  */
 const exec = (context) => check(context) && (
   async () => {
-    removePrompt(context.userId);
-    removeHistory(context.userId);
+    removePrompt(context.id);
+    removeHistory(context.id);
     context.pushText(COMMAND_BOT_FORGET.reply);
     return context;
   }

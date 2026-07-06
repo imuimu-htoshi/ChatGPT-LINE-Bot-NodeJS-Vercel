@@ -3,8 +3,8 @@ import config from '../../config/index.js';
 import { addMark } from '../../utils/index.js';
 import Message from './message.js';
 
-const MAX_MESSAGES = config.APP_MAX_PROMPT_MESSAGES / 2;
-const MAX_TOKENS = config.APP_MAX_PROMPT_TOKENS / 2;
+const MAX_MESSAGES = config.APP_MAX_PROMPT_MESSAGES;
+const MAX_TOKENS = config.APP_MAX_PROMPT_TOKENS;
 
 class History {
   messages = [];
@@ -28,16 +28,20 @@ class History {
     return this;
   }
 
+  trim() {
+    while (this.messages.length > MAX_MESSAGES || this.tokenCount >= MAX_TOKENS) {
+      this.messages.shift();
+    }
+    return this;
+  }
+
   /**
    * @param {string} role
    * @param {string} content
    */
   write(role, content) {
-    if (this.messages.length >= MAX_MESSAGES || this.tokenCount >= MAX_TOKENS) {
-      this.messages.shift();
-    }
     this.messages.push(new Message({ role, content: addMark(content) }));
-    return this;
+    return this.trim();
   }
 
   /**

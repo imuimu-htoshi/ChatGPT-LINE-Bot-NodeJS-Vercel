@@ -23,12 +23,16 @@ const check = (context) => (
  */
 const exec = (context) => check(context) && (
   async () => {
-    const prompt = getPrompt(context.userId);
+    if (!context.hasPromptText) {
+      context.pushText(t('__ERROR_EMPTY_PROMPT'));
+      return context;
+    }
+    const prompt = getPrompt(context.id);
     prompt.write(ROLE_HUMAN, `${t('__COMPLETION_DEFAULT_AI_TONE')(config.BOT_TONE)}${context.trimmedText}`).write(ROLE_AI);
     try {
       const { text, isFinishReasonStop } = await generateCompletion({ prompt });
       prompt.patch(text);
-      setPrompt(context.userId, prompt);
+      setPrompt(context.id, prompt);
       updateHistory(context.id, (history) => history.write(config.BOT_NAME, text));
       const actions = isFinishReasonStop ? [] : [COMMAND_BOT_CONTINUE];
       context.pushText(text, actions);

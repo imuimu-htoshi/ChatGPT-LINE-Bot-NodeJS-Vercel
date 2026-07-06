@@ -1,7 +1,7 @@
 import handleEvents from './app.js';
 import { printHistories } from './history/index.js';
 import {
-  getPrompt, printPrompts, removePrompt, setPrompt,
+  getPrompt, printPrompts, removePrompt, setPrompt, Prompt,
 } from './prompt/index.js';
 
 export {
@@ -11,4 +11,5 @@ export {
   printPrompts,
   removePrompt,
   setPrompt,
+  Prompt,
 };

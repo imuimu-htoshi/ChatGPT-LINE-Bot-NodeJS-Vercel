@@ -75,31 +75,44 @@ class Context {
     return this.event.userId;
   }
 
+  get text() {
+    if (this.event.isText) return this.event.text;
+    if (this.event.isAudio) return this.transcription || '';
+    return '';
+  }
+
+  get normalizedText() {
+    return this.text.replaceAll('　', ' ').trim();
+  }
+
+  get textWithoutBotName() {
+    const text = this.normalizedText;
+    const botName = config.BOT_NAME.trim();
+    if (!botName) return text;
+    if (!text.toLowerCase().startsWith(botName.toLowerCase())) return text;
+    return text.slice(botName.length).trim();
+  }
+
   /**
    * @returns {string}
    */
   get trimmedText() {
-    if (this.event.isText) {
-      const text = this.event.text.replaceAll('　', ' ').replace(config.BOT_NAME, '').trim();
-      return addMark(text);
-    }
-    if (this.event.isAudio) {
-      const text = this.transcription.replace(config.BOT_NAME, '').trim();
-      return addMark(text);
-    }
-    return '?';
+    return addMark(this.textWithoutBotName);
   }
 
   get hasBotName() {
-    if (this.event.isText) {
-      const text = this.event.text.replaceAll('　', ' ').trim().toLowerCase();
-      return text.startsWith(config.BOT_NAME.toLowerCase());
-    }
-    if (this.event.isAudio) {
-      const text = this.transcription.toLowerCase();
-      return text.startsWith(config.BOT_NAME.toLowerCase());
-    }
-    return false;
+    const botName = config.BOT_NAME.trim();
+    if (!botName) return false;
+    return this.normalizedText.toLowerCase().startsWith(botName.toLowerCase());
+  }
+
+  get hasPromptText() {
+    return this.textWithoutBotName.length > 0;
+  }
+
+  get shouldHandle() {
+    if (!this.event.isGroup) return true;
+    return this.hasBotName;
   }
 
   async initialize() {
@@ -116,7 +129,9 @@ class Context {
         return this.pushError(err);
       }
     }
-    updateHistory(this.id, (history) => history.write(this.source.name, this.trimmedText));
+    if (this.shouldHandle && this.hasPromptText) {
+      updateHistory(this.id, (history) => history.write(this.source.name, this.trimmedText));
+    }
     return this;
   }
 

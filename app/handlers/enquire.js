@@ -30,13 +30,13 @@ const exec = (context) => check(context) && (
     const reference = command.type === TYPE_TRANSLATE ? history.lastMessage.content : history.toString();
     const content = `${command.prompt}\n${t('__COMPLETION_QUOTATION_MARK_OPENING')}\n${reference}\n${t('__COMPLETION_QUOTATION_MARK_CLOSING')}`;
     const partial = (new Prompt()).write(ROLE_HUMAN, content);
-    const prompt = getPrompt(context.userId);
+    const prompt = getPrompt(context.id);
     prompt.write(ROLE_HUMAN, content).write(ROLE_AI);
     try {
       const { text, isFinishReasonStop } = await generateCompletion({ prompt: partial });
       prompt.patch(text);
       if (!isFinishReasonStop) prompt.write('', command.type);
-      setPrompt(context.userId, prompt);
+      setPrompt(context.id, prompt);
       const defaultActions = ALL_COMMANDS.filter(({ type }) => type === command.type);
       const actions = isFinishReasonStop ? defaultActions : [COMMAND_BOT_CONTINUE];
       context.pushText(text, actions);

@@ -1,4 +1,5 @@
 import { replyMessage } from '../utils/index.js';
+import config from '../config/index.js';
 import {
   activateHandler,
   commandHandler,
@@ -17,6 +18,18 @@ import {
 } from './handlers/index.js';
 import Context from './context.js';
 import Event from './models/event.js';
+
+const hasBotName = (text = '') => {
+  const botName = config.BOT_NAME.trim();
+  if (!botName) return false;
+  return text.replaceAll('　', ' ').trim().toLowerCase().startsWith(botName.toLowerCase());
+};
+
+const shouldHandleEvent = (event) => {
+  if (!event.isGroup) return true;
+  if (!event.isText) return false;
+  return hasBotName(event.text);
+};
 
 /**
  * @param {Context} context
@@ -48,6 +61,7 @@ const handleEvents = async (events = []) => (
           .map((event) => new Event(event))
           .filter((event) => event.isMessage)
           .filter((event) => event.isText || event.isAudio)
+          .filter((event) => shouldHandleEvent(event))
           .map((event) => new Context(event))
           .map((context) => context.initialize()),
       ))

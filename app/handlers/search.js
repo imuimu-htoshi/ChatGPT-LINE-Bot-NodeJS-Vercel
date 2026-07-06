@@ -20,7 +20,7 @@ const check = (context) => context.hasCommand(COMMAND_BOT_SEARCH);
 const exec = (context) => check(context) && (
   async () => {
     let trimmedText = context.trimmedText.replace(COMMAND_BOT_SEARCH.text, '');
-    const prompt = getPrompt(context.userId);
+    const prompt = getPrompt(context.id);
     if (!config.SERPAPI_API_KEY) context.pushText(t('__ERROR_MISSING_ENV')('SERPAPI_API_KEY'));
     try {
       const { answer } = await fetchAnswer(trimmedText);
@@ -32,7 +32,7 @@ const exec = (context) => check(context) && (
     try {
       const { text, isFinishReasonStop } = await generateCompletion({ prompt });
       prompt.patch(text);
-      setPrompt(context.userId, prompt);
+      setPrompt(context.id, prompt);
       updateHistory(context.id, (history) => history.write(config.BOT_NAME, text));
       const actions = isFinishReasonStop ? [] : [COMMAND_BOT_CONTINUE];
       context.pushText(text, actions);
