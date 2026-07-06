@@ -1,7 +1,7 @@
 import config from '../../config/index.js';
 import { t } from '../../locales/index.js';
 import { ROLE_AI, ROLE_HUMAN } from '../../services/openai.js';
-import { fetchAnswer, generateCompletion } from '../../utils/index.js';
+import { fetchAnswer, generateCompletion, generateWebSearchCompletion } from '../../utils/index.js';
 import { COMMAND_BOT_CONTINUE, COMMAND_BOT_SEARCH } from '../commands/index.js';
 import Context from '../context.js';
 import { buildRequestPrompt } from '../prompt/build-request-prompt.js';
@@ -27,8 +27,37 @@ const exec = (context) => check(context) && (
       context.pushText(t('__ERROR_EMPTY_PROMPT'));
       return context;
     }
+    const query = context.route?.webSearch?.query || requestText;
+    const resolvedDateLabel = context.route?.webSearch?.resolvedDate?.label || '';
     if (!config.SERPAPI_API_KEY) {
-      context.pushText(t('__ERROR_MISSING_ENV')('SERPAPI_API_KEY'));
+      try {
+        const {
+          text,
+          model,
+          usage,
+          cost,
+        } = await generateWebSearchCompletion({
+          input: t('__COMPLETION_WEB_SEARCH')(query, resolvedDateLabel),
+        });
+        if (!text) {
+          context.pushText(t('__COMPLETION_SEARCH_NOT_FOUND'));
+          return context;
+        }
+        updateHistory(context.id, (history) => history.write(config.BOT_NAME, text));
+        context.recordUsage({
+          kind: 'completion',
+          source: 'search-openai-web',
+          model,
+          inputTokens: usage?.promptTokens || 0,
+          outputTokens: usage?.completionTokens || 0,
+          totalTokens: usage?.totalTokens || 0,
+          estimatedCostUsd: cost,
+          query,
+        });
+        context.pushText(text);
+      } catch (err) {
+        context.pushError(err);
+      }
       return context;
     }
     const prompt = buildRequestPrompt({
@@ -36,8 +65,6 @@ const exec = (context) => check(context) && (
       currentText: context.trimmedText,
       includeHistory: context.route?.needsHistory,
     });
-    const query = context.route?.webSearch?.query || requestText;
-    const resolvedDateLabel = context.route?.webSearch?.resolvedDate?.label || '';
     try {
       const { answer } = await fetchAnswer(query);
       if (!answer) {

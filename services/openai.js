@@ -92,6 +92,17 @@ const createImage = ({
   output_compression: outputCompression,
 });
 
+const createWebSearchResponse = ({
+  model = config.OPENAI_COMPLETION_MODEL,
+  input,
+  maxOutputTokens = config.OPENAI_COMPLETION_MAX_TOKENS,
+}) => client.post('/v1/responses', {
+  model,
+  input,
+  tools: [{ type: 'web_search' }],
+  max_output_tokens: maxOutputTokens,
+});
+
 const createAudioTranscriptions = ({
   buffer,
   file,
@@ -110,4 +121,5 @@ export {
   createTextCompletion,
   createImage,
   createAudioTranscriptions,
+  createWebSearchResponse,
 };

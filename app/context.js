@@ -255,7 +255,7 @@ class Context {
   pushText(text, actions = []) {
     if (!text) return this;
     const prefix = config.BOT_OUTPUT_PREFIX?.trim();
-    const content = prefix && !text.startsWith(prefix) ? `${prefix}\n${text}` : text;
+    const content = prefix && !text.startsWith(prefix) ? `${prefix}\n\n${text}` : text;
     const message = new TextMessage({
       type: MESSAGE_TYPE_TEXT,
       text: convertText(content),

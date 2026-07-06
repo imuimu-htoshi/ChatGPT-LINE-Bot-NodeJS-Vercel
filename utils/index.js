@@ -10,6 +10,7 @@ import fetchUser from './fetch-user.js';
 import fetchVersion from './fetch-version.js';
 import generateCompletion from './generate-completion.js';
 import generateImage from './generate-image.js';
+import generateWebSearchCompletion from './generate-web-search-completion.js';
 import generateTranscription from './generate-transcription.js';
 import getCommand from './get-command.js';
 import getVersion from './get-version.js';
@@ -30,6 +31,7 @@ export {
   fetchVersion,
   generateCompletion,
   generateImage,
+  generateWebSearchCompletion,
   generateTranscription,
   getCommand,
   getVersion,

@@ -69,7 +69,7 @@ VERCEL_TEAM_ID=
 VERCEL_DEPLOY_HOOK_URL=
 ```
 
-`SERPAPI_API_KEY` はWeb検索機能を使う場合に必要です。`VERCEL_ACCESS_TOKEN`、`VERCEL_PROJECT_NAME`、`VERCEL_TEAM_ID` は既存のVercel環境変数ストレージや再デプロイコマンドを使う場合に必要です。会話プロンプトと履歴は現在メモリ上で直近分だけ保持します。
+`SERPAPI_API_KEY` は任意です。未設定の場合、Web検索はOpenAIの組み込みWeb検索にフォールバックします。`VERCEL_ACCESS_TOKEN`、`VERCEL_PROJECT_NAME`、`VERCEL_TEAM_ID` は既存のVercel環境変数ストレージや再デプロイコマンドを使う場合に必要です。会話プロンプトと履歴は現在メモリ上で直近分だけ保持します。
 
 ### 入力ルーティング
 
@@ -107,10 +107,10 @@ VERCEL_DEPLOY_HOOK_URL=
 
 ### 最新情報と天気
 
-- `天気`、`ニュース`、`最新`、`現在` などの鮮度依存の質問は、SERPAPIが設定されていれば自動で検索ルートに入ります。
+- `天気`、`ニュース`、`最新`、`現在` などの鮮度依存の質問は、自動で検索ルートに入ります。
 - `明日`、`今日`、`来週` などの相対日付は `APP_TIMEZONE` を基準に絶対日付へ解決してから検索します。
 - 例: 日本時間で 2026-07-06 に `明日の天気` と送ると、内部では `2026-07-07` を含む検索クエリに変換します。
-- SERPAPI未設定時は、古い知識で推測せず設定不足として返します。
+- `SERPAPI_API_KEY` が設定されていればSerpAPIで検索し、未設定ならOpenAIの組み込みWeb検索（Responses API）で回答します。
 
 ### コストログ
 
