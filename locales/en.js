@@ -99,10 +99,12 @@ const en = {
   __COMPLETION_DEFAULT_AI_PROMPT: (name) => (name ? `I am ${name}` : 'Hello'),
   __COMPLETION_DEFAULT_AI_TONE: (tone) => (tone ? `以${tone}的語氣回應我：` : ''), // TODO
   __COMPLETION_SEARCH: (a, q) => `根據「${a}」查詢結果，回答「${q}」問題`, // TODO
+  __COMPLETION_SEARCH_WITH_SOURCE: (a, q, d = '') => `${d ? `Date: ${d}\n` : ''}Answer "${q}" briefly using only the following search result.\nSearch result: ${a}`,
   __COMPLETION_SEARCH_NOT_FOUND: '查無資料', // TODO
   __COMPLETION_QUOTATION_MARK_OPENING: '"',
   __COMPLETION_QUOTATION_MARK_CLOSING: '"',
   __ERROR_ECONNABORTED: 'Timed out',
+  __ERROR_INVALID_CREDENTIALS: 'Please check external service credentials.',
   __ERROR_UNKNOWN: 'Something went wrong',
   __ERROR_MAX_GROUPS_REACHED: 'Maximum groups reached',
   __ERROR_MAX_USERS_REACHED: 'Maximum users reached',

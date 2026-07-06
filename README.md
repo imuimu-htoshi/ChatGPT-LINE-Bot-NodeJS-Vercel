@@ -40,9 +40,24 @@ OPENAI_COMPLETION_MODEL=gpt-4o-mini
 APP_MAX_PROMPT_MESSAGES=10
 APP_MAX_PROMPT_TOKENS=2048
 OPENAI_COMPLETION_MAX_TOKENS=500
+APP_TIMEZONE=Asia/Tokyo
+APP_DEFAULT_LOCATION=東京都
+APP_PUBLIC_URL=https://{vercel-domain}
 ```
 
 `BOT_INIT_PROMPT` は未設定でも議論整理AI向けの日本語プロンプトが使われます。変更する場合は、VercelのEnvironment Variablesで上書きしてください。
+
+### 開発者限定で使うための環境変数
+
+```env
+APP_OWNER_USER_ID=Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+APP_ALLOWED_USER_IDS=Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+APP_ALLOWED_GROUP_IDS=Cxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+- 1対1トークは `APP_ALLOWED_USER_IDS` に含まれる `userId` だけが利用できます。
+- グループトークは `APP_ALLOWED_USER_IDS` に加えて `APP_ALLOWED_GROUP_IDS` に含まれる `groupId` だけが利用できます。
+- 何も設定しなければ従来通り制限なしです。
 
 ### 任意環境変数
 
@@ -55,6 +70,17 @@ VERCEL_DEPLOY_HOOK_URL=
 ```
 
 `SERPAPI_API_KEY` はWeb検索機能を使う場合に必要です。`VERCEL_ACCESS_TOKEN`、`VERCEL_PROJECT_NAME`、`VERCEL_TEAM_ID` は既存のVercel環境変数ストレージや再デプロイコマンドを使う場合に必要です。会話プロンプトと履歴は現在メモリ上で直近分だけ保持します。
+
+### 入力ルーティング
+
+このForkでは、受信テキストを最初に簡易判定してから既存ハンドラへ渡します。
+
+- 通常の質問: 通常の会話ルート
+- 文脈依存の質問: 直近履歴を付けて会話ルート
+- 画像生成依頼: 画像生成ルート
+- 最新情報、天気、ニュース、事実確認: Web検索ルート
+
+履歴は毎回投入せず、`この件どう思う？` や `さっきの続きを` のように前提が省略された入力だけに絞って使います。
 
 ### グループでの呼び出し仕様
 
@@ -75,9 +101,38 @@ VERCEL_DEPLOY_HOOK_URL=
 ### 会話履歴
 
 - グループでは `groupId` 単位、1対1では `userId` 単位で会話プロンプトを分けます。
-- AI APIに渡す会話メッセージは `APP_MAX_PROMPT_MESSAGES` の直近件数だけです。
+- AI APIに渡す会話メッセージは、履歴が必要と判定された場合だけ `APP_MAX_PROMPT_MESSAGES` の直近件数を使います。
 - デフォルトは10件です。11件目以降は古いものから削除します。
 - トークン上限は `APP_MAX_PROMPT_TOKENS` で調整できます。
+
+### 最新情報と天気
+
+- `天気`、`ニュース`、`最新`、`現在` などの鮮度依存の質問は、SERPAPIが設定されていれば自動で検索ルートに入ります。
+- `明日`、`今日`、`来週` などの相対日付は `APP_TIMEZONE` を基準に絶対日付へ解決してから検索します。
+- 例: 日本時間で 2026-07-06 に `明日の天気` と送ると、内部では `2026-07-07` を含む検索クエリに変換します。
+- SERPAPI未設定時は、古い知識で推測せず設定不足として返します。
+
+### コストログ
+
+```env
+APP_COST_LOG_ENABLED=true
+OPENAI_COMPLETION_INPUT_PRICE_PER_1M=
+OPENAI_COMPLETION_OUTPUT_PRICE_PER_1M=
+OPENAI_IMAGE_MODEL=gpt-image-1-mini
+OPENAI_IMAGE_QUALITY=low
+OPENAI_IMAGE_OUTPUT_FORMAT=jpeg
+OPENAI_IMAGE_OUTPUT_COMPRESSION=80
+```
+
+- OpenAI応答ごとに、使用モデル、入力トークン、出力トークン、推定コストをサーバーログへ出します。
+- `OPENAI_COMPLETION_INPUT_PRICE_PER_1M` と `OPENAI_COMPLETION_OUTPUT_PRICE_PER_1M` を設定すると、任意モデルでも推定コストを上書きできます。
+- 画像生成は `OPENAI_IMAGE_MODEL` が `gpt-image-2`、`gpt-image-1.5`、`gpt-image-1-mini` のいずれかなら推定コストを出します。
+
+### 画像生成の注意
+
+- OpenAI の最新画像APIは base64 画像を返すため、このForkでは一時URL `/generated-images/:id` 経由で LINE に渡します。
+- `APP_PUBLIC_URL` は必須です。Vercel 本番URLか独自ドメインを入れてください。
+- OpenAI 側で画像生成モデルの利用に Organization Verification が必要な場合があります。
 
 ### モデル変更
 
@@ -94,6 +149,8 @@ OPENAI_COMPLETION_MODEL=gpt-4o-mini
 - `gpt-4o`
 
 モデルを変えたらVercelでEnvironment Variablesを更新し、再デプロイしてください。
+
+料金計算も使う場合は、同じモデルに合わせて `OPENAI_COMPLETION_INPUT_PRICE_PER_1M` と `OPENAI_COMPLETION_OUTPUT_PRICE_PER_1M` も合わせて更新してください。
 
 ### 今後調整できるBot設計項目
 

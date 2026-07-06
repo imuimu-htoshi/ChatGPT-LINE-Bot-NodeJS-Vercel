@@ -1,6 +1,6 @@
 import { encode } from 'gpt-3-encoder';
 import config from '../../config/index.js';
-import { addMark } from '../../utils/index.js';
+import addMark from '../../utils/add-mark.js';
 import Message from './message.js';
 
 const MAX_MESSAGES = config.APP_MAX_PROMPT_MESSAGES;

@@ -8,6 +8,7 @@ import {
 import {
   addMark,
   convertText,
+  isAllowedSource,
   fetchAudio,
   fetchGroup,
   fetchUser,
@@ -41,6 +42,10 @@ class Context {
    * @type {Array<Message>}
    */
   messages = [];
+
+  route = null;
+
+  usage = [];
 
   /**
    * @param {Event} event
@@ -115,6 +120,35 @@ class Context {
     return this.hasBotName;
   }
 
+  setRoute(route) {
+    this.route = route;
+    return this;
+  }
+
+  getCommandPayload(command) {
+    const candidates = [command.text, ...command.aliases]
+      .filter(Boolean)
+      .sort((a, b) => b.length - a.length);
+    const matched = candidates.find((candidate) => this.trimmedText.toLowerCase().startsWith(candidate.toLowerCase()));
+    if (!matched) return this.trimmedText;
+    return this.trimmedText.slice(matched.length).trim();
+  }
+
+  recordUsage(metric) {
+    if (!metric) return this;
+    this.usage.push(metric);
+    if (config.APP_COST_LOG_ENABLED) {
+      console.info(JSON.stringify({
+        contextId: this.id,
+        userId: this.userId,
+        groupId: this.groupId,
+        route: this.route?.responseType || null,
+        ...metric,
+      }));
+    }
+    return this;
+  }
+
   async initialize() {
     try {
       this.validate();
@@ -139,6 +173,17 @@ class Context {
    * @throws {Error}
    */
   validate() {
+    const access = isAllowedSource({
+      userId: this.userId,
+      groupId: this.event.isGroup ? this.groupId : null,
+      allowedUserIds: config.APP_ALLOWED_USER_IDS,
+      allowedGroupIds: config.APP_ALLOWED_GROUP_IDS,
+    });
+    if (!access.isAllowed) {
+      const err = new Error('Access denied');
+      err.silent = true;
+      throw err;
+    }
     const sources = getSources();
     const groups = Object.values(sources).filter(({ type }) => type === SOURCE_TYPE_GROUP);
     const users = Object.values(sources).filter(({ type }) => type === SOURCE_TYPE_USER);
@@ -209,9 +254,11 @@ class Context {
    */
   pushText(text, actions = []) {
     if (!text) return this;
+    const prefix = config.BOT_OUTPUT_PREFIX?.trim();
+    const content = prefix && !text.startsWith(prefix) ? `${prefix}\n${text}` : text;
     const message = new TextMessage({
       type: MESSAGE_TYPE_TEXT,
-      text: convertText(text),
+      text: convertText(content),
     });
     message.setQuickReply(actions);
     this.messages.push(message);
@@ -258,17 +305,27 @@ class Context {
    */
   pushError(err) {
     this.error = err;
-    console.log(this.error.message);
+    if (err.silent) {
+      console.info(err.message);
+      return this;
+    }
+    console.error(this.error);
     if (err.code === 'ECONNABORTED') {
       if (config.ERROR_MESSAGE_DISABLED) return this;
       return this.pushText(t('__ERROR_ECONNABORTED'), [COMMAND_BOT_RETRY]);
+    }
+    if (err.config?.baseURL && [401, 403].includes(err.response?.status)) {
+      if (config.ERROR_MESSAGE_DISABLED) return this;
+      return this.pushText(t('__ERROR_INVALID_CREDENTIALS'));
     }
     if (err.response?.status >= 500) {
       if (config.ERROR_MESSAGE_DISABLED) return this;
       return this.pushText(t('__ERROR_UNKNOWN'), [COMMAND_BOT_RETRY]);
     }
-    if (err.config?.baseURL) this.pushText(`${err.config.method.toUpperCase()} ${err.config.baseURL}${err.config.url}`);
-    if (err.response) this.pushText(`Request failed with status code ${err.response.status}`);
+    if (err.config?.baseURL || err.response) {
+      if (config.ERROR_MESSAGE_DISABLED) return this;
+      return this.pushText(t('__ERROR_UNKNOWN'));
+    }
     this.pushText(err.message);
     return this;
   }

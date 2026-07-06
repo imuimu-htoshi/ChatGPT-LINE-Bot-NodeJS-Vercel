@@ -1,5 +1,7 @@
 import addMark from './add-mark.js';
+import isAllowedSource from './access-policy.js';
 import convertText from './convert-text.js';
+import estimateCompletionCost, { estimateImageCost } from './estimate-cost.js';
 import fetchAnswer from './fetch-answer.js';
 import fetchAudio from './fetch-audio.js';
 import fetchEnvironment from './fetch-environment.js';
@@ -16,7 +18,10 @@ import validateSignature from './validate-signature.js';
 
 export {
   addMark,
+  isAllowedSource,
   convertText,
+  estimateCompletionCost,
+  estimateImageCost,
   fetchAnswer,
   fetchAudio,
   fetchEnvironment,

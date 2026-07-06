@@ -1,5 +1,6 @@
 import express from 'express';
 import { handleEvents, printPrompts } from '../app/index.js';
+import { getGeneratedImage } from '../app/repository/generated-image.js';
 import config from '../config/index.js';
 import { validateLineSignature } from '../middleware/index.js';
 import storage from '../storage/index.js';
@@ -25,6 +26,17 @@ app.get('/info', async (req, res) => {
   const currentVersion = getVersion();
   const latestVersion = await fetchVersion();
   res.status(200).send({ currentVersion, latestVersion });
+});
+
+app.get('/generated-images/:id', (req, res) => {
+  const record = getGeneratedImage(req.params.id);
+  if (!record) {
+    res.sendStatus(404);
+    return;
+  }
+  res.setHeader('Content-Type', record.mimeType);
+  res.setHeader('Cache-Control', 'public, max-age=3600, immutable');
+  res.sendFile(record.filePath);
 });
 
 app.post(config.APP_WEBHOOK_PATH, validateLineSignature, async (req, res) => {

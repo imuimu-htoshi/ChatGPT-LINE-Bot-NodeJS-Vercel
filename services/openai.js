@@ -76,12 +76,20 @@ const createTextCompletion = ({
 
 const createImage = ({
   prompt,
+  model = config.OPENAI_IMAGE_MODEL,
   n = 1,
-  size = IMAGE_SIZE_256,
+  size = config.OPENAI_IMAGE_GENERATION_SIZE,
+  quality = config.OPENAI_IMAGE_QUALITY,
+  outputFormat = config.OPENAI_IMAGE_OUTPUT_FORMAT,
+  outputCompression = config.OPENAI_IMAGE_OUTPUT_COMPRESSION,
 }) => client.post('/v1/images/generations', {
   prompt,
+  model,
   n,
   size,
+  quality,
+  output_format: outputFormat,
+  output_compression: outputCompression,
 });
 
 const createAudioTranscriptions = ({

@@ -2,7 +2,7 @@ import { encode } from 'gpt-3-encoder';
 import config from '../../config/index.js';
 import { t } from '../../locales/index.js';
 import { ROLE_AI, ROLE_HUMAN, ROLE_SYSTEM } from '../../services/openai.js';
-import { addMark } from '../../utils/index.js';
+import addMark from '../../utils/add-mark.js';
 import Message from './message.js';
 
 const INITIAL_MESSAGES = 3;

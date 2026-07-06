@@ -18,6 +18,7 @@ import {
 } from './handlers/index.js';
 import Context from './context.js';
 import Event from './models/event.js';
+import { buildRoutingDecision } from './routing/index.js';
 
 const hasBotName = (text = '') => {
   const botName = config.BOT_NAME.trim();
@@ -36,6 +37,8 @@ const shouldHandleEvent = (event) => {
  * @returns {Promise<Context>}
  */
 const handleContext = async (context) => (
+  context.setRoute(buildRoutingDecision(context))
+  && (
   activateHandler(context)
   || commandHandler(context)
   || continueHandler(context)
@@ -51,6 +54,7 @@ const handleContext = async (context) => (
   || versionHandler(context)
   || talkHandler(context)
   || context
+  )
 );
 
 const handleEvents = async (events = []) => (
