@@ -28,6 +28,12 @@ const DEFAULT_BOT_INIT_PROMPT = [
   '不明点がある場合は、確認質問を1つだけ出してください。',
 ].join('\n');
 
+const DEFAULT_BOT_NAME = '@GPT for Shibu';
+const resolveBotName = (value) => {
+  if (!value || value.trim().toLowerCase() === '@gpt') return DEFAULT_BOT_NAME;
+  return value;
+};
+
 const config = Object.freeze({
   APP_ENV: env.NODE_ENV || 'production',
   APP_DEBUG: env.APP_DEBUG === 'true' || false,
@@ -52,7 +58,7 @@ const config = Object.freeze({
   APP_USD_JPY_RATE: parseNumber(env.APP_USD_JPY_RATE, 150),
   HUMAN_NAME: env.HUMAN_NAME || '',
   HUMAN_INIT_PROMPT: env.HUMAN_INIT_PROMPT || '',
-  BOT_NAME: env.BOT_NAME || '@gpt',
+  BOT_NAME: resolveBotName(env.BOT_NAME),
   BOT_OUTPUT_PREFIX: env.BOT_OUTPUT_PREFIX || 'この出力は澁澤のポケットマネーが減っています。大切に使用してください。\n\n',
   BOT_INIT_PROMPT: env.BOT_INIT_PROMPT || DEFAULT_BOT_INIT_PROMPT,
   BOT_TONE: env.BOT_TONE || '',

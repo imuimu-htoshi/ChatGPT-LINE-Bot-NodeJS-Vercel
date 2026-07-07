@@ -10,7 +10,7 @@ GPT AI Assistant is an application that is implemented using the OpenAI API and 
 
 ## LINEグループ議論支援Bot設定メモ
 
-このForkでは、日本語のLINEグループで議論支援AIとして使う前提のデフォルト設定にしています。1対1トークでは従来通り通常メッセージに返信し、グループトークでは `BOT_NAME` で始まるテキストだけに返信します。デフォルトの呼び出し名は `@gpt` です。
+このForkでは、日本語のLINEグループで議論支援AIとして使う前提のデフォルト設定にしています。1対1トークでは従来通り通常メッセージに返信し、グループトークでは `BOT_NAME` で始まるテキストだけに返信します。デフォルトの呼び出し名は `@GPT for Shibu` です。
 
 ### Webhook URL
 
@@ -35,7 +35,7 @@ OPENAI_API_KEY=
 ```env
 APP_LANG=ja
 APP_WEBHOOK_PATH=/webhook
-BOT_NAME=@gpt
+BOT_NAME=@GPT for Shibu
 OPENAI_COMPLETION_MODEL=gpt-4o-mini
 APP_MAX_PROMPT_MESSAGES=10
 APP_MAX_PROMPT_TOKENS=2048
@@ -84,18 +84,18 @@ VERCEL_DEPLOY_HOOK_URL=
 
 ### グループでの呼び出し仕様
 
-- グループでは `@gpt` で始まるテキストだけに返信します。
-- 通常発言や文中に `@gpt` が含まれるだけの発言には返信しません。
-- OpenAIへ渡す本文からは先頭の `@gpt` を削除します。
-- `@gpt` だけの発言には「質問内容を入力してください。」と返します。
+- グループでは `@GPT for Shibu` で始まるテキストだけに返信します。
+- 通常発言や文中に `@GPT for Shibu` が含まれるだけの発言には返信しません。
+- OpenAIへ渡す本文からは先頭の `@GPT for Shibu` を削除します。
+- `@GPT for Shibu` だけの発言には「質問内容を入力してください。」と返します。
 - 1対1トークでは従来通り全メッセージに返信します。
 
 例:
 
 ```text
-@gpt この議論を整理して
-@gpt A案とB案を比較して
-@gpt 次に決めるべきことを出して
+@GPT for Shibu この議論を整理して
+@GPT for Shibu A案とB案を比較して
+@GPT for Shibu 次に決めるべきことを出して
 ```
 
 ### 会話履歴
@@ -175,7 +175,7 @@ AIの性格:
 
 呼び出し名:
 
-- `@gpt`
+- `@GPT for Shibu`
 - `@ai`
 - `@Gemini`
 - `@Keisuke`
