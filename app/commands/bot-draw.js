@@ -7,9 +7,5 @@ export default new Command({
   label: t('__COMMAND_BOT_DRAW_LABEL'),
   text: t('__COMMAND_BOT_DRAW_TEXT'),
   prompt: t('__COMMAND_BOT_DRAW_PROMPT'),
-  aliases: [
-    ...t('__COMMAND_BOT_DRAW_ALIASES'),
-    '/draw',
-    'Draw',
-  ],
+  aliases: [],
 });

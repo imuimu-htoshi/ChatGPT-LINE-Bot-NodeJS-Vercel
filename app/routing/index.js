@@ -8,16 +8,7 @@ export const RESPONSE_TYPE_WEB = 'web';
 
 const WEATHER_KEYWORDS = /(天気|気温|降水|雨|雪|台風|湿度|予報)/i;
 const NEWS_KEYWORDS = /(ニュース|速報|ヘッドライン|トレンド)/i;
-const FRESH_INFO_KEYWORDS = /(最新|現在|いま|今|本日|今日|明日|明後日|昨日|来週|来月|今週|週末|相場|株価|為替|レート|料金|価格|日程|スケジュール|試合結果|結果|勝敗|時刻|発売日|営業中|混雑)/i;
-const SEARCH_VERBS = /(検索して|調べて|確認して|教えて|見てきて|ググって)/i;
-const IMAGE_KEYWORDS = /(画像|イラスト|作画|描いて|描いてください|生成して|作って|作成して)/i;
-const HISTORY_REFERENCE_PATTERNS = [
-  /^(これ|それ|あれ|この|その|あの|ここ|そこ|あそこ)/i,
-  /^(この件|その件|例の件|前の件|さっきの件|上の件|下の件)/i,
-  /^(続き|つづき|さっきの続きを|前の続きを)/i,
-  /^(同じ条件で|同じ前提で|前提を踏まえて)/i,
-  /(どう思う[?？]?|どうする[?？]?|どうなった[?？]?|それで[?？]?|つまり[?？]?|どっちがいい[?？]?|どれがいい[?？]?)/i,
-];
+const REFERENCE_COMMAND = '/ref';
 
 const WEEK_PERIOD_KEYWORDS = {
   今週: 0,
@@ -73,14 +64,16 @@ class RoutingDecision {
 
 const normalizeText = (text = '') => text.replaceAll('　', ' ').trim();
 
-const extractCommandPayload = (text, command) => {
+const getCommandPayload = (text, command) => {
   const normalizedText = normalizeText(text);
   const candidates = [command.text, ...command.aliases]
     .filter(Boolean)
     .sort((a, b) => b.length - a.length);
   const matched = candidates.find((candidate) => normalizedText.toLowerCase().startsWith(candidate.toLowerCase()));
-  if (!matched) return normalizedText;
-  return normalizedText.slice(matched.length).trim();
+  return {
+    matched: Boolean(matched),
+    text: matched ? normalizedText.slice(matched.length).trim() : normalizedText,
+  };
 };
 
 const getPreviousHistoryMessages = (context) => {
@@ -88,27 +81,6 @@ const getPreviousHistoryMessages = (context) => {
   if (history.messages.length < 1) return [];
   return history.messages.slice(0, -1);
 };
-
-const needsHistoryReference = (text, previousMessageCount) => (
-  previousMessageCount > 0
-  && (
-    HISTORY_REFERENCE_PATTERNS.some((pattern) => pattern.test(text))
-    || (text.length <= 12 && /(なぜ|なんで|どうして|詳しく|もっと|比較して|整理して)/i.test(text))
-  )
-);
-
-const isImageGenerationRequest = (text) => (
-  IMAGE_KEYWORDS.test(text)
-  && /(作成|生成|描|イラスト|作画)/i.test(text)
-);
-
-const isWebSearchRequest = (text, isExplicitSearch) => (
-  isExplicitSearch
-  || WEATHER_KEYWORDS.test(text)
-  || NEWS_KEYWORDS.test(text)
-  || (FRESH_INFO_KEYWORDS.test(text) && SEARCH_VERBS.test(text))
-  || (FRESH_INFO_KEYWORDS.test(text) && /(天気|ニュース|株価|為替|料金|価格|日程|試合|結果|営業|時刻)/i.test(text))
-);
 
 const getTimeZoneDateParts = (date, timeZone) => {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -216,17 +188,14 @@ const buildWebSearch = (context, {
 const buildRoutingDecision = (context, {
   now = new Date(),
 } = {}) => {
-  const explicitImage = context.hasCommand(COMMAND_BOT_DRAW);
-  const explicitSearch = context.hasCommand(COMMAND_BOT_SEARCH);
-  const requestText = explicitImage
-    ? extractCommandPayload(context.trimmedText, COMMAND_BOT_DRAW)
-    : explicitSearch
-      ? extractCommandPayload(context.trimmedText, COMMAND_BOT_SEARCH)
-      : context.trimmedText;
-  const previousMessageCount = getPreviousHistoryMessages(context).length;
-  const needsHistory = needsHistoryReference(requestText, previousMessageCount);
-  const needsImageGeneration = explicitImage || isImageGenerationRequest(requestText);
-  const needsWebSearch = !needsImageGeneration && isWebSearchRequest(requestText, explicitSearch);
+  const reference = getCommandPayload(context.trimmedText, { text: REFERENCE_COMMAND, aliases: [] });
+  const routeText = reference.matched ? reference.text : normalizeText(context.trimmedText);
+  const image = getCommandPayload(routeText, COMMAND_BOT_DRAW);
+  const search = getCommandPayload(routeText, COMMAND_BOT_SEARCH);
+  const needsHistory = reference.matched;
+  const needsImageGeneration = image.matched;
+  const needsWebSearch = !needsImageGeneration && search.matched;
+  const requestText = needsImageGeneration ? image.text : needsWebSearch ? search.text : routeText;
   const reasons = [];
   if (needsHistory) reasons.push('history');
   if (needsImageGeneration) reasons.push('image');
@@ -251,10 +220,6 @@ export {
   RoutingDecision,
   buildRoutingDecision,
   buildWebSearch,
-  extractCommandPayload,
-  isImageGenerationRequest,
-  isWebSearchRequest,
-  needsHistoryReference,
   resolveRelativeDate,
 };
 
