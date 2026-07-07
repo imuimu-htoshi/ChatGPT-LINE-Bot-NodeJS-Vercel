@@ -3,6 +3,7 @@ import {
 } from '@jest/globals';
 import { ROLE_AI, ROLE_HUMAN } from '../services/openai.js';
 import { Prompt, getPrompt, handleEvents, removePrompt } from '../app/index.js';
+import { getHistory, removeHistory } from '../app/history/index.js';
 import config from '../config/index.js';
 import { MOCK_GROUP_02 } from '../constants/mock.js';
 import { t } from '../locales/index.js';
@@ -13,12 +14,15 @@ import {
 afterEach(() => {
   removePrompt(MOCK_GROUP_02);
   removePrompt(MOCK_USER_01);
+  removeHistory(MOCK_GROUP_02);
+  removeHistory(MOCK_USER_01);
 });
 
 test('GROUP_IGNORES_MESSAGES_WITHOUT_BOT_NAME', async () => {
   const results = await handleEvents(createEvents(['通常発言です'], MOCK_GROUP_02, MOCK_USER_01));
 
   expect(results).toEqual([]);
+  expect(getHistory(MOCK_GROUP_02).lastMessage.content).toEqual('通常発言です。');
 }, TIMEOUT);
 
 test('GROUP_RESPONDS_ONLY_TO_PREFIXED_MESSAGE_AND_STRIPS_BOT_NAME', async () => {

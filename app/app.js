@@ -1,4 +1,4 @@
-import { replyMessage } from '../utils/index.js';
+import { isAllowedSource, replyMessage } from '../utils/index.js';
 import config from '../config/index.js';
 import {
   activateHandler,
@@ -19,6 +19,7 @@ import {
 import Context from './context.js';
 import Event from './models/event.js';
 import { buildRoutingDecision } from './routing/index.js';
+import { updateHistory } from './history/index.js';
 
 const hasBotName = (text = '') => {
   const botName = config.BOT_NAME.trim();
@@ -30,6 +31,23 @@ const shouldHandleEvent = (event) => {
   if (!event.isGroup) return true;
   if (!event.isText) return false;
   return hasBotName(event.text);
+};
+
+const shouldRememberEvent = (event) => {
+  if (!event.isGroup || !event.isText || hasBotName(event.text)) return false;
+  return isAllowedSource({
+    userId: event.userId,
+    groupId: event.groupId,
+    allowedUserIds: config.APP_ALLOWED_USER_IDS,
+    allowedGroupIds: config.APP_ALLOWED_GROUP_IDS,
+  }).isAllowed;
+};
+
+const rememberEvent = (event) => {
+  if (shouldRememberEvent(event)) {
+    updateHistory(event.groupId, (history) => history.write(event.userId, event.text));
+  }
+  return event;
 };
 
 /**
@@ -66,6 +84,7 @@ const handleEvents = async (events = []) => (
           .map((event) => new Event(event))
           .filter((event) => event.isMessage)
           .filter((event) => event.isText || event.isAudio)
+          .map((event) => rememberEvent(event))
           .filter((event) => shouldHandleEvent(event))
           .map((event) => new Context(event))
           .map((context) => context.initialize()),
