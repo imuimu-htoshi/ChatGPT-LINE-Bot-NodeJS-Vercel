@@ -96,7 +96,10 @@ class Context {
     const botName = config.BOT_NAME.trim();
     if (!botName) return text;
     if (!text.toLowerCase().startsWith(botName.toLowerCase())) return text;
-    return text.slice(botName.length).trim();
+    const content = text.slice(botName.length).trim();
+    const commandIndex = content.search(/(^|\s)(\/(?:search|draw|ref)\b)/i);
+    if (commandIndex > -1) return content.slice(commandIndex).trim();
+    return content;
   }
 
   /**
